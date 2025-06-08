@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { usePathname } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 
@@ -7,7 +8,28 @@ interface NavigationBarProps {
 }
 
 const NavigationBar: React.FC<NavigationBarProps> = ({ onTabPress }) => {
+  const pathname = usePathname();
   const [activeTab, setActiveTab] = useState('Home');
+
+  // Pathname'e göre aktif tab'ı belirle
+  useEffect(() => {
+    switch (pathname) {
+      case '/':
+        setActiveTab('Home');
+        break;
+      case '/favorites':
+        setActiveTab('Favorites');
+        break;
+      case '/create':
+        setActiveTab('Create');
+        break;
+      case '/profile':
+        setActiveTab('Profile');
+        break;
+      default:
+        setActiveTab('Home');
+    }
+  }, [pathname]);
 
   const tabs = [
     { name: 'Home', icon: 'home' },
@@ -18,7 +40,6 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ onTabPress }) => {
   ];
 
   const handleTabPress = (tabName: string) => {
-    setActiveTab(tabName);
     onTabPress && onTabPress(tabName);
   };
 
