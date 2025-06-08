@@ -1,11 +1,18 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import NavigationBar from "../components/NavigationBar";
 
 export default function Favorites() {
+  const { tab } = useLocalSearchParams();
   const [activeTab, setActiveTab] = useState('bookmark');
+
+  useEffect(() => {
+    if (tab === 'clock') {
+      setActiveTab('clock');
+    }
+  }, [tab]);
 
   const handleTabPress = (tabName: string) => {
     switch (tabName) {
