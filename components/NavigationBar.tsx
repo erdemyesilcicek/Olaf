@@ -11,8 +11,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ onTabPress }) => {
 
   const tabs = [
     { name: 'Home', icon: 'home' },
-    { name: 'Favorites', icon: 'heart' },
-    { name: 'Create', icon: 'plus' },
+    { name: 'Favorites', icon: 'bookmark' },
+    { name: 'Create', icon: 'plus' }, // Olaf için özel
     { name: 'History', icon: 'clock' },
     { name: 'Profile', icon: 'user' }
   ];
