@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, FlatList, Image, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import Icon from 'react-native-vector-icons/Feather';
 import NavigationBar from "../components/NavigationBar";
 
 export default function Profile() {
@@ -15,7 +16,7 @@ export default function Profile() {
   const [isGenderModalVisible, setIsGenderModalVisible] = useState(false);
   const [isZodiacModalVisible, setIsZodiacModalVisible] = useState(false);
 
-  // 9 adet avatar seçeneği (şimdilik hepsi Olaf)
+  // 6 adet avatar seçeneği
   const avatarOptions = [
     require('../assets/images/olaf.png'),
     require('../assets/images/dog.png'),
@@ -34,21 +35,38 @@ export default function Profile() {
     'Terazi', 'Akrep', 'Yay', 'Oğlak', 'Kova', 'Balık'
   ];
 
-  // Kaydedilmiş avatar'ı yükle
+  // Kaydedilmiş profil bilgilerini yükle
   useEffect(() => {
-    loadSavedAvatar();
+    loadSavedProfile();
   }, []);
 
-  const loadSavedAvatar = async () => {
+  const loadSavedProfile = async () => {
     try {
       if (Platform.OS !== 'web') {
         const savedAvatar = await AsyncStorage.getItem('selectedAvatar');
+        const savedName = await AsyncStorage.getItem('userName');
+        const savedAge = await AsyncStorage.getItem('userAge');
+        const savedGender = await AsyncStorage.getItem('userGender');
+        const savedZodiac = await AsyncStorage.getItem('userZodiac');
+        
         if (savedAvatar !== null) {
           setSelectedAvatar(parseInt(savedAvatar));
         }
+        if (savedName !== null) {
+          setUserName(savedName);
+        }
+        if (savedAge !== null) {
+          setUserAge(savedAge);
+        }
+        if (savedGender !== null) {
+          setUserGender(savedGender);
+        }
+        if (savedZodiac !== null) {
+          setUserZodiac(savedZodiac);
+        }
       }
     } catch (error) {
-      console.log('Avatar yüklenirken hata oluştu:', error);
+      console.log('Profil bilgileri yüklenirken hata oluştu:', error);
     }
   };
 
@@ -64,7 +82,7 @@ export default function Profile() {
         router.push('/create');
         break;
       case 'Profile':
-        // Already on Profile
+        router.push('/profile');
         break;
     }
   };
@@ -104,6 +122,22 @@ export default function Profile() {
   const selectZodiac = (zodiac: string) => {
     setUserZodiac(zodiac);
     setIsZodiacModalVisible(false);
+  };
+
+  const saveProfile = async () => {
+    try {
+      if (Platform.OS !== 'web') {
+        await AsyncStorage.setItem('selectedAvatar', selectedAvatar.toString());
+        await AsyncStorage.setItem('userName', userName);
+        await AsyncStorage.setItem('userAge', userAge);
+        await AsyncStorage.setItem('userGender', userGender);
+        await AsyncStorage.setItem('userZodiac', userZodiac);
+      }
+      Alert.alert('Başarılı', 'Profil bilgileriniz başarıyla kaydedildi!');
+    } catch (error) {
+      Alert.alert('Hata', 'Profil bilgileri kaydedilemedi');
+      console.log('Profil kaydetme hatası:', error);
+    }
   };
 
   const saveAvatar = async () => {
@@ -149,7 +183,7 @@ export default function Profile() {
     <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>Profil</Text>
-        <Text style={styles.subtitle}>Profil ayarlarınız ve istatistikleriniz</Text>
+        <Text style={styles.subtitle}>Profil bilgileriniz ve ayarlarınız</Text>
         
         {/* Avatar */}
         <TouchableOpacity style={styles.avatarContainer} onPress={openModal}>
@@ -159,7 +193,7 @@ export default function Profile() {
             resizeMode="cover"
           />
           <View style={styles.editBadge}>
-            <Text style={styles.editBadgeText}>✏️</Text>
+            <Icon name="edit-2" size={16} color="#fff" />
           </View>
         </TouchableOpacity>
 
@@ -199,7 +233,7 @@ export default function Profile() {
         </TouchableOpacity>
 
         {/* Kaydet Butonu */}
-        <TouchableOpacity style={styles.saveButton} onPress={() => Alert.alert('Profil Kaydedildi', 'Profil bilgileriniz başarıyla kaydedildi!')}>
+        <TouchableOpacity style={styles.saveButton} onPress={saveProfile}>
           <Text style={styles.saveButtonText}>Profili Kaydet</Text>
         </TouchableOpacity>
       </View>
@@ -367,9 +401,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 2,
     borderColor: '#fff',
-  },
-  editBadgeText: {
-    fontSize: 16,
   },
   nameInput: {
     width: '80%',
