@@ -1,13 +1,19 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, FlatList, Image, Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, FlatList, Image, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import NavigationBar from "../components/NavigationBar";
 
 export default function Profile() {
   const [selectedAvatar, setSelectedAvatar] = useState(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [tempSelectedAvatar, setTempSelectedAvatar] = useState(0);
+  const [userName, setUserName] = useState('');
+  const [userAge, setUserAge] = useState('');
+  const [userGender, setUserGender] = useState('');
+  const [userZodiac, setUserZodiac] = useState('');
+  const [isGenderModalVisible, setIsGenderModalVisible] = useState(false);
+  const [isZodiacModalVisible, setIsZodiacModalVisible] = useState(false);
 
   // 9 adet avatar seçeneği (şimdilik hepsi Olaf)
   const avatarOptions = [
@@ -17,6 +23,15 @@ export default function Profile() {
     require('../assets/images/horse.png'),
     require('../assets/images/elephant.png'),
     require('../assets/images/tiger.png'),
+  ];
+
+  // Cinsiyet seçenekleri
+  const genderOptions = ['Erkek', 'Kadın', 'Diğer'];
+
+  // Burç seçenekleri
+  const zodiacOptions = [
+    'Koç', 'Boğa', 'İkizler', 'Yengeç', 'Aslan', 'Başak',
+    'Terazi', 'Akrep', 'Yay', 'Oğlak', 'Kova', 'Balık'
   ];
 
   // Kaydedilmiş avatar'ı yükle
@@ -63,6 +78,34 @@ export default function Profile() {
     setTempSelectedAvatar(index);
   };
 
+  const handleAgeChange = (text: string) => {
+    // Sadece sayısal karakterlere izin ver
+    const numericValue = text.replace(/[^0-9]/g, '');
+    
+    // Başındaki sıfırları kaldır (tek 0 hariç)
+    const trimmedValue = numericValue.replace(/^0+/, '') || (numericValue === '0' ? '0' : '');
+    
+    setUserAge(trimmedValue);
+  };
+
+  const openGenderModal = () => {
+    setIsGenderModalVisible(true);
+  };
+
+  const selectGender = (gender: string) => {
+    setUserGender(gender);
+    setIsGenderModalVisible(false);
+  };
+
+  const openZodiacModal = () => {
+    setIsZodiacModalVisible(true);
+  };
+
+  const selectZodiac = (zodiac: string) => {
+    setUserZodiac(zodiac);
+    setIsZodiacModalVisible(false);
+  };
+
   const saveAvatar = async () => {
     try {
       setSelectedAvatar(tempSelectedAvatar);
@@ -86,7 +129,7 @@ export default function Profile() {
           isSelected && styles.selectedAvatarOption
         ]}
         onPress={() => selectAvatar(index)}
-        activeOpacity={0.7}
+        activeOpacity={1}
       >
         <Image 
           source={item} 
@@ -118,6 +161,41 @@ export default function Profile() {
           <View style={styles.editBadge}>
             <Text style={styles.editBadgeText}>✏️</Text>
           </View>
+        </TouchableOpacity>
+
+        {/* İsim Input */}
+        <TextInput
+          style={styles.nameInput}
+          placeholder="İsminizi girin"
+          value={userName}
+          onChangeText={setUserName}
+          placeholderTextColor="#999"
+          maxLength={30}
+        />
+
+        {/* Yaş Input */}
+        <TextInput
+          style={styles.ageInput}
+          placeholder="Yaşınızı girin"
+          value={userAge}
+          onChangeText={handleAgeChange}
+          placeholderTextColor="#999"
+          keyboardType="numeric"
+          maxLength={2}
+        />
+
+        {/* Cinsiyet Dropdown */}
+        <TouchableOpacity style={styles.genderDropdown} onPress={openGenderModal}>
+          <Text style={[styles.genderText, !userGender && styles.placeholderText]}>
+            {userGender || 'Cinsiyetinizi seçin'}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Burç Dropdown */}
+        <TouchableOpacity style={styles.zodiacDropdown} onPress={openZodiacModal}>
+          <Text style={[styles.zodiacText, !userZodiac && styles.placeholderText]}>
+            {userZodiac || 'Burcunuzu seçin'}
+          </Text>
         </TouchableOpacity>
 
         {/* Kaydet Butonu */}
@@ -168,6 +246,70 @@ export default function Profile() {
                 <Text style={styles.confirmButtonText}>Kaydet</Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Cinsiyet Seçim Modal */}
+      <Modal
+        visible={isGenderModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setIsGenderModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.genderModalContent}>
+            <Text style={styles.modalTitle}>Cinsiyet Seçin</Text>
+            
+            {genderOptions.map((gender, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.genderOption}
+                onPress={() => selectGender(gender)}
+              >
+                <Text style={styles.genderOptionText}>{gender}</Text>
+              </TouchableOpacity>
+            ))}
+            
+            <TouchableOpacity 
+              style={styles.genderCancelButton}
+              onPress={() => setIsGenderModalVisible(false)}
+            >
+              <Text style={styles.genderCancelButtonText}>İptal</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Burç Seçim Modal */}
+      <Modal
+        visible={isZodiacModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setIsZodiacModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.zodiacModalContent}>
+            <Text style={styles.modalTitle}>Burç Seçin</Text>
+            
+            <View style={styles.zodiacGrid}>
+              {zodiacOptions.map((zodiac, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.zodiacOption}
+                  onPress={() => selectZodiac(zodiac)}
+                >
+                  <Text style={styles.zodiacOptionText}>{zodiac}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            
+            <TouchableOpacity 
+              style={styles.zodiacCancelButton}
+              onPress={() => setIsZodiacModalVisible(false)}
+            >
+              <Text style={styles.zodiacCancelButtonText}>İptal</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -228,6 +370,46 @@ const styles = StyleSheet.create({
   },
   editBadgeText: {
     fontSize: 16,
+  },
+  nameInput: {
+    width: '80%',
+    height: 50,
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+    borderRadius: 12,
+    paddingHorizontal: 20,
+    fontSize: 16,
+    backgroundColor: '#fff',
+    textAlign: 'center',
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  ageInput: {
+    width: '80%',
+    height: 50,
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+    borderRadius: 12,
+    paddingHorizontal: 20,
+    fontSize: 16,
+    backgroundColor: '#fff',
+    textAlign: 'center',
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   saveButton: {
     backgroundColor: '#6B73FF',
@@ -341,5 +523,166 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  genderDropdown: {
+    width: '80%',
+    height: 50,
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+    borderRadius: 12,
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  genderText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  placeholderText: {
+    color: '#999',
+  },
+  dropdownIcon: {
+    fontSize: 12,
+    color: '#666',
+  },
+  genderModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 24,
+    width: '80%',
+    maxHeight: '60%',
+  },
+  genderOption: {
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    marginVertical: 4,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  genderOptionText: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  genderCancelButton: {
+    backgroundColor: '#f5f5f5',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 20,
+  },
+  genderCancelButtonText: {
+    color: '#666',
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  zodiacDropdown: {
+    width: '80%',
+    height: 50,
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+    borderRadius: 12,
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  zodiacText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  zodiacModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 28,
+    width: '92%',
+    maxHeight: '75%',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 8,
+  },
+  zodiacGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+    paddingHorizontal: 4,
+  },
+  zodiacOption: {
+    width: '30%',
+    paddingVertical: 14,
+    paddingHorizontal: 6,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    marginVertical: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 3,
+    minHeight: 45,
+    justifyContent: 'center',
+  },
+  zodiacOptionText: {
+    fontSize: 15,
+    color: '#333',
+    textAlign: 'center',
+    fontWeight: '600',
+  },
+  zodiacCancelButton: {
+    backgroundColor: '#f5f5f5',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 20,
+  },
+  zodiacCancelButtonText: {
+    color: '#666',
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
