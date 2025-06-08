@@ -13,7 +13,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ onTabPress }) => {
     { name: 'Home', icon: 'home' },
     { name: 'Favorites', icon: 'bookmark' },
     { name: 'Create', icon: 'plus' }, // Olaf için özel
-    { name: 'History', icon: 'clock' },
+    //{ name: 'History', icon: 'clock' },
     { name: 'Profile', icon: 'user' }
   ];
 
@@ -32,6 +32,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ onTabPress }) => {
             activeTab === tab.name && styles.activeTab
           ]}
           onPress={() => handleTabPress(tab.name)}
+          activeOpacity={1}
         >
           {tab.name === 'Create' ? (
             <Image 
