@@ -49,6 +49,9 @@ export default function Index() {
       case 'Favorites':
         router.push('/favorites');
         break;
+      case 'History':
+        router.push('/history');
+        break;
       case 'Create':
         router.push('/create');
         break;

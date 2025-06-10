@@ -2,17 +2,17 @@ import { router } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 import NavigationBar from "../components/NavigationBar";
 
-export default function Favorites() {
+export default function History() {
   const handleTabPress = (tabName: string) => {
     switch (tabName) {
       case 'Home':
         router.push('/');
         break;
       case 'Favorites':
-        // Already on Favorites
+        router.push('/favorites');
         break;
       case 'History':
-        router.push('/history');
+        // Already on History
         break;
       case 'Create':
         router.push('/create');
@@ -26,9 +26,9 @@ export default function Favorites() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>Favoriler</Text>
+        <Text style={styles.title}>Geçmiş</Text>
         <Text style={styles.subtitle}>
-          Favori kartlarınız burada görünecek
+          Geçmişte oluşturulan kartlar burada görünecek
         </Text>
       </View>
       <NavigationBar onTabPress={handleTabPress} />

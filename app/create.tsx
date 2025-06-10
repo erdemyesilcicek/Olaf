@@ -11,6 +11,9 @@ export default function Create() {
       case 'Favorites':
         router.push('/favorites');
         break;
+      case 'History':
+        router.push('/history');
+        break;
       case 'Create':
         // Already on Create
         break;

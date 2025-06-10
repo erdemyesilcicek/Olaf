@@ -78,6 +78,9 @@ export default function Profile() {
       case 'Favorites':
         router.push('/favorites');
         break;
+      case 'History':
+        router.push('/history');
+        break;
       case 'Create':
         router.push('/create');
         break;
