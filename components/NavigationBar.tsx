@@ -9,13 +9,13 @@ interface NavigationBarProps {
 
 const NavigationBar: React.FC<NavigationBarProps> = ({ onTabPress }) => {
   const pathname = usePathname();
-  const [activeTab, setActiveTab] = useState('Ana Sayfa');
+  const [activeTab, setActiveTab] = useState('Giriş');
 
   // Pathname'e göre aktif tab'ı belirle
   useEffect(() => {
     switch (pathname) {
       case '/':
-        setActiveTab('Ana Sayfa');
+        setActiveTab('Giriş');
         break;
       case '/favorites':
         setActiveTab('Favoriler');
@@ -30,12 +30,12 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ onTabPress }) => {
         setActiveTab('Profil');
         break;
       default:
-        setActiveTab('Ana Sayfa');
+        setActiveTab('Giriş');
     }
   }, [pathname]);
 
   const mainTabs = [
-    { name: 'Ana Sayfa', icon: 'home', routeName: 'Home' },
+    { name: 'Giriş', icon: 'home', routeName: 'Home' },
     { name: 'Favoriler', icon: 'bookmark', routeName: 'Favorites' },
     { name: 'Geçmiş', icon: 'clock', routeName: 'History' },
     { name: 'Profil', icon: 'user', routeName: 'Profile' }
@@ -44,10 +44,11 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ onTabPress }) => {
   const handleTabPress = (tabName: string) => {
     // Türkçe isimleri route isimlerine çevir
     const routeMapping: { [key: string]: string } = {
-      'Ana Sayfa': 'Home',
+      'Giriş': 'Home',
       'Favoriler': 'Favorites', 
       'Geçmiş': 'History',
-      'Profil': 'Profile'
+      'Profil': 'Profile',
+      'Create': 'Create'
     };
     
     const routeName = routeMapping[tabName] || tabName;
@@ -107,6 +108,12 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ onTabPress }) => {
             }
           ]}
         />
+        <Text style={[
+          styles.createLabel,
+          activeTab === 'Create' && styles.activeCreateLabel
+        ]}>
+          Oluştur
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -141,9 +148,9 @@ const styles = StyleSheet.create({
     minWidth: 180,
   },
   createButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: '#ffffff',
     justifyContent: 'center',
     alignItems: 'center',
@@ -158,19 +165,18 @@ const styles = StyleSheet.create({
   },
   activeCreateButton: {
     backgroundColor: '#6B73FF',
-    transform: [{ scale: 1.05 }],
   },
   tab: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
     borderRadius: 20,
-    minWidth: 50,
+    width: 60,
+    height: 50,
   },
   activeTab: {
     backgroundColor: '#6B73FF08',
-    transform: [{ scale: 1.05 }],
   },
   createIcon: {
     width: 24,
@@ -184,6 +190,16 @@ const styles = StyleSheet.create({
   },
   activeLabel: {
     color: '#6B73FF',
+    fontWeight: '600',
+  },
+  createLabel: {
+    fontSize: 10,
+    color: '#9CA3AF',
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  activeCreateLabel: {
+    color: '#FFFFFF',
     fontWeight: '600',
   },
   // Eski stilleri kaldırıyoruz
