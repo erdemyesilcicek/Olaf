@@ -1,28 +1,6 @@
-import { router } from "expo-router";
 import { Image, StyleSheet, Text, View } from "react-native";
-import NavigationBar from "../components/NavigationBar";
 
 export default function Create() {
-  const handleTabPress = (tabName: string) => {
-    switch (tabName) {
-      case 'Home':
-        router.push('/');
-        break;
-      case 'Favorites':
-        router.push('/favorites');
-        break;
-      case 'History':
-        router.push('/history');
-        break;
-      case 'Create':
-        // Already on Create
-        break;
-      case 'Profile':
-        router.push('/profile');
-        break;
-    }
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -41,7 +19,6 @@ export default function Create() {
           <Text style={styles.cardSubtitle}>yeni bir kart oluşturmak için Olaf'a tıklayın!</Text>
         </View>
       </View>
-      <NavigationBar onTabPress={handleTabPress} />
     </View>
   );
 }

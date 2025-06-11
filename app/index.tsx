@@ -2,7 +2,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import NavigationBar from "../components/NavigationBar";
 
 export default function Index() {
   const [selectedAvatar, setSelectedAvatar] = useState(0);
@@ -39,25 +38,6 @@ export default function Index() {
       }
     } catch (error) {
       console.log('Avatar yüklenirken hata oluştu:', error);
-    }
-  };
-  const handleTabPress = (tabName: string) => {
-    switch (tabName) {
-      case 'Home':
-        // Already on Home
-        break;
-      case 'Favorites':
-        router.push('/favorites');
-        break;
-      case 'History':
-        router.push('/history');
-        break;
-      case 'Create':
-        router.push('/create');
-        break;
-      case 'Profile':
-        router.push('/profile');
-        break;
     }
   };
 
@@ -211,8 +191,6 @@ export default function Index() {
 
         <View style={{ height: 100 }} />
       </ScrollView>
-      
-      <NavigationBar onTabPress={handleTabPress} />
     </View>
   );
 }

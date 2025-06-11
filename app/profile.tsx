@@ -1,9 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, FlatList, Image, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Icon from 'react-native-vector-icons/Feather';
-import NavigationBar from "../components/NavigationBar";
 
 export default function Profile() {
   const [selectedAvatar, setSelectedAvatar] = useState(0);
@@ -67,26 +65,6 @@ export default function Profile() {
       }
     } catch (error) {
       console.log('Profil bilgileri yüklenirken hata oluştu:', error);
-    }
-  };
-
-  const handleTabPress = (tabName: string) => {
-    switch (tabName) {
-      case 'Home':
-        router.push('/');
-        break;
-      case 'Favorites':
-        router.push('/favorites');
-        break;
-      case 'History':
-        router.push('/history');
-        break;
-      case 'Create':
-        router.push('/create');
-        break;
-      case 'Profile':
-        router.push('/profile');
-        break;
     }
   };
 
@@ -350,8 +328,6 @@ export default function Profile() {
           </View>
         </View>
       </Modal>
-
-      <NavigationBar onTabPress={handleTabPress} />
     </View>
   );
 }
