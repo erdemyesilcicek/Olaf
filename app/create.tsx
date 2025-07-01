@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#fff',
     borderRadius: 16,
-    padding: 24,
+    padding: 32,
     width: '100%',
     minHeight: 500,
     shadowColor: '#000',
@@ -66,8 +66,9 @@ const styles = StyleSheet.create({
   imageCard: {
     backgroundColor: '#f8f8f8',
     borderRadius: 12,
-    padding: 8,
-    marginBottom: 20,
+    padding: 24,
+    marginBottom: 24,
+    width: '100%',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -76,10 +77,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cardImage: {
-    width: 350,
-    height: 350,
+    width: 280,
+    height: 280,
   },
   cardTitle: {
     fontSize: 24,
