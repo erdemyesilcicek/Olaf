@@ -4,9 +4,6 @@ export default function Create() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>Olaf'la Öğren</Text>
-        <Text style={styles.subtitle}>Ruhunun derinliklerine dokun!</Text>
-        
         <View style={styles.card}>
           <View style={styles.imageCard}>
             <Image 
@@ -33,18 +30,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 30,
   },
   card: {
     backgroundColor: '#fff',

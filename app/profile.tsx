@@ -163,9 +163,6 @@ export default function Profile() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>Profil</Text>
-        <Text style={styles.subtitle}>Profil bilgileriniz ve ayarlarınız</Text>
-        
         {/* Avatar */}
         <TouchableOpacity style={styles.avatarContainer} onPress={openModal}>
           <Image 
@@ -342,18 +339,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 40,
   },
   avatarContainer: {
     position: 'relative',

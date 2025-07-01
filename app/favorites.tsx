@@ -4,8 +4,7 @@ export default function Favorites() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>Favoriler</Text>
-        <Text style={styles.subtitle}>
+        <Text style={styles.emptyText}>
           Favori kartlarınız burada görünecek
         </Text>
       </View>
@@ -24,13 +23,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
-  },
-  subtitle: {
+  emptyText: {
     fontSize: 16,
     color: '#666',
     textAlign: 'center',

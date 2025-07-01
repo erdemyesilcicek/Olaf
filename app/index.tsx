@@ -115,13 +115,6 @@ export default function Index() {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.welcomeText}>Merhaba! 👋</Text>
-          <Text style={styles.dateText}>8 Haziran 2025, Pazartesi</Text>
-          <Text style={styles.questionText}>Bugün hangi kartı oluşturacaksın?</Text>
-        </View>
-
         {/* Günlük Motivasyon */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Günün Sözü</Text>
@@ -202,30 +195,6 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 50,
-    paddingBottom: 20,
-    backgroundColor: '#FFFFFF',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-  },
-  welcomeText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1F2937',
-    marginBottom: 4,
-  },
-  dateText: {
-    fontSize: 14,
-    color: '#6B7280',
-    marginBottom: 8,
-  },
-  questionText: {
-    fontSize: 16,
-    color: '#374151',
-    fontWeight: '500',
   },
   section: {
     marginTop: 24,
