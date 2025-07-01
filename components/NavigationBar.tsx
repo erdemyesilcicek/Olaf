@@ -67,7 +67,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ onTabPress }) => {
               activeTab === tab.name && styles.activeTab
             ]}
             onPress={() => handleTabPress(tab.name)}
-            activeOpacity={0.7}
+            activeOpacity={1}
           >
             <Icon 
               name={tab.icon}
@@ -95,7 +95,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ onTabPress }) => {
           activeTab === 'Create' && styles.activeCreateButton
         ]}
         onPress={() => handleTabPress('Create')}
-        activeOpacity={0.8}
+        activeOpacity={1}
       >
         <Image 
           source={require('../assets/images/olaf.png')}
