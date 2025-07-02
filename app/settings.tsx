@@ -156,7 +156,7 @@ export default function Settings() {
             <Text style={styles.appCopyright}>© 2025 Olaf Team</Text>
           </View>
 
-          <View style={{ height: 100 }} />
+          <View style={{ height: 30 }} />
         </View>
       </ScrollView>
     </View>
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   settingsSection: {
-    marginBottom: 32,
+    marginBottom: 8,
   },
   sectionTitle: {
     fontSize: 20,
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
   },
   appInfo: {
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingVertical: 12,
   },
   appVersion: {
     fontSize: 14,
