@@ -54,6 +54,8 @@ export default function RootLayout() {
         return { title: 'Profil', subtitle: 'Profil bilgileriniz ve ayarlarınız' };
       case '/settings':
         return { title: 'Ayarlar', subtitle: 'Uygulama ayarları ve tercihler' };
+      case '/edit-profile':
+        return { title: 'Profil Düzenle', subtitle: 'Profil bilgilerinizi güncelleyin' };
       default:
         return { title: 'Olaf', subtitle: 'Motivasyon uygulaması' };
     }
