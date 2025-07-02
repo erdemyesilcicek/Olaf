@@ -1,5 +1,5 @@
 import { Stack, router, usePathname } from "expo-router";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Icon from 'react-native-vector-icons/Feather';
 import NavigationBar from "../components/NavigationBar";
 
@@ -27,17 +27,17 @@ export default function RootLayout() {
   };
 
   const handleSettingsPress = () => {
-    Alert.alert(
-      'Ayarlar',
-      'Hangi ayara gitmek istiyorsunuz?',
-      [
-        { text: 'Bildirimler', onPress: () => console.log('Bildirimler') },
-        { text: 'Gizlilik', onPress: () => console.log('Gizlilik') },
-        { text: 'Hesap', onPress: () => console.log('Hesap') },
-        { text: 'Hakkında', onPress: () => console.log('Hakkında') },
-        { text: 'İptal', style: 'cancel' }
-      ]
-    );
+    router.push('/settings');
+  };
+
+  const handleBackPress = () => {
+    router.back();
+  };
+
+  const canGoBack = () => {
+    // Ana sayfalar dışında geri butonu göster
+    const mainPages = ['/', '/favorites', '/history', '/create', '/profile'];
+    return !mainPages.includes(pathname);
   };
 
   const getPageInfo = () => {
@@ -52,6 +52,8 @@ export default function RootLayout() {
         return { title: 'Oluştur', subtitle: 'Yeni motivasyon kartı oluşturun' };
       case '/profile':
         return { title: 'Profil', subtitle: 'Profil bilgileriniz ve ayarlarınız' };
+      case '/settings':
+        return { title: 'Ayarlar', subtitle: 'Uygulama ayarları ve tercihler' };
       default:
         return { title: 'Olaf', subtitle: 'Motivasyon uygulaması' };
     }
@@ -63,16 +65,30 @@ export default function RootLayout() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerLeft}>
+        {/* Back Button */}
+        {canGoBack() && (
+          <TouchableOpacity 
+            style={styles.backButton} 
+            onPress={handleBackPress}
+            activeOpacity={0.7}
+          >
+            <Icon name="arrow-left" size={24} color="#6B73FF" />
+          </TouchableOpacity>
+        )}
+        
+        {/* Title Section */}
+        <View style={styles.headerCenter}>
           <Text style={styles.title}>{pageInfo.title}</Text>
           <Text style={styles.subtitle}>{pageInfo.subtitle}</Text>
         </View>
+        
+        {/* Menu Button */}
         <TouchableOpacity 
           style={styles.settingsButton} 
           onPress={handleSettingsPress}
           activeOpacity={0.7}
         >
-          <Icon name="settings" size={24} color="#6B73FF" />
+          <Icon name="menu" size={24} color="#6B73FF" />
         </TouchableOpacity>
       </View>
 
@@ -98,12 +114,34 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 20,
     backgroundColor: '#f5f5f5',
+    minHeight: 100,
+  },
+  backButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  headerCenter: {
+    flex: 1,
+    justifyContent: 'center',
   },
   headerLeft: {
     flex: 1,
@@ -120,6 +158,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 3,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 'auto',
   },
   content: {
     flex: 1,
@@ -128,11 +171,10 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 5,
+    marginBottom: 2,
   },
   subtitle: {
     fontSize: 16,
     color: '#666',
-    marginBottom: 0,
   },
 });
