@@ -43,23 +43,14 @@ export default function Settings() {
 
   const handleOptionPress = (option: string) => {
     switch (option) {
-      case 'notifications':
-        Alert.alert('Bildirimler', 'Bildirim ayarları burada yapılacak');
-        break;
       case 'privacy':
         Alert.alert('Gizlilik', 'Gizlilik ayarları burada yapılacak');
-        break;
-      case 'account':
-        Alert.alert('Hesap', 'Hesap ayarları burada yapılacak');
         break;
       case 'theme':
         Alert.alert('Tema', 'Tema ayarları burada yapılacak');
         break;
       case 'language':
         Alert.alert('Dil', 'Dil ayarları burada yapılacak');
-        break;
-      case 'backup':
-        Alert.alert('Yedekleme', 'Veri yedekleme ayarları burada yapılacak');
         break;
       case 'about':
         Alert.alert(
@@ -75,60 +66,39 @@ export default function Settings() {
 
   const settingsOptions = [
     {
-      id: 'notifications',
-      title: 'Bildirimler',
-      subtitle: 'Push bildirimlerini yönet',
-      icon: 'bell',
-      color: '#FF6B6B'
-    },
-    {
-      id: 'privacy',
-      title: 'Gizlilik ve Güvenlik',
-      subtitle: 'Gizlilik ayarlarını düzenle',
-      icon: 'shield',
-      color: '#4ECDC4'
-    },
-    {
-      id: 'account',
-      title: 'Hesap Ayarları',
-      subtitle: 'Profil ve hesap bilgileri',
-      icon: 'user',
-      color: '#45B7D1'
+      id: 'language',
+      title: 'Dil',
+      subtitle: 'Uygulama dili seçimi',
+      icon: 'globe',
+      color: '#3B82F6'
     },
     {
       id: 'theme',
       title: 'Tema',
       subtitle: 'Görünüm ve tema ayarları',
       icon: 'palette',
-      color: '#96CEB4'
+      color: '#8B5CF6'
     },
     {
-      id: 'language',
-      title: 'Dil',
-      subtitle: 'Uygulama dili seçimi',
-      icon: 'globe',
-      color: '#FECA57'
-    },
-    {
-      id: 'backup',
-      title: 'Yedekleme',
-      subtitle: 'Verilerinizi yedekleyin',
-      icon: 'download-cloud',
-      color: '#FF9FF3'
+      id: 'privacy',
+      title: 'Gizlilik ve Güvenlik',
+      subtitle: 'Gizlilik ayarlarını düzenle',
+      icon: 'shield',
+      color: '#10B981'
     },
     {
       id: 'support',
       title: 'Destek',
       subtitle: 'Yardım ve destek al',
       icon: 'help-circle',
-      color: '#54A0FF'
+      color: '#F59E0B'
     },
     {
       id: 'about',
       title: 'Hakkında',
       subtitle: 'Uygulama bilgileri',
       icon: 'info',
-      color: '#5F27CD'
+      color: '#6366F1'
     }
   ];
 
