@@ -1,16 +1,11 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from "react";
-import { Alert, FlatList, Image, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, FlatList, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Icon from 'react-native-vector-icons/Feather';
+import { profileViewModel, ProfileViewModelState } from '../viewmodels/ProfileViewModel';
 
 export default function EditProfile() {
-  const [selectedAvatar, setSelectedAvatar] = useState(0);
+  const [vmState, setVmState] = useState<ProfileViewModelState>(profileViewModel.getState());
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [tempSelectedAvatar, setTempSelectedAvatar] = useState(0);
-  const [userName, setUserName] = useState('');
-  const [userAge, setUserAge] = useState('');
-  const [userGender, setUserGender] = useState('');
-  const [userZodiac, setUserZodiac] = useState('');
   const [isGenderModalVisible, setIsGenderModalVisible] = useState(false);
   const [isZodiacModalVisible, setIsZodiacModalVisible] = useState(false);
 
@@ -33,58 +28,33 @@ export default function EditProfile() {
     'Terazi', 'Akrep', 'Yay', 'Oğlak', 'Kova', 'Balık'
   ];
 
-  // Kaydedilmiş profil bilgilerini yükle
+  // Component mount olduğunda ViewModel'i dinle ve profil bilgilerini yükle
   useEffect(() => {
-    loadSavedProfile();
+    // ViewModel state'ini dinle
+    const handleStateChange = (state: ProfileViewModelState) => {
+      setVmState(state);
+    };
+
+    profileViewModel.addListener(handleStateChange);
+    profileViewModel.loadSavedProfile();
+
+    // Cleanup
+    return () => {
+      profileViewModel.removeListener(handleStateChange);
+    };
   }, []);
 
-  const loadSavedProfile = async () => {
-    try {
-      if (Platform.OS !== 'web') {
-        const savedAvatar = await AsyncStorage.getItem('selectedAvatar');
-        const savedName = await AsyncStorage.getItem('userName');
-        const savedAge = await AsyncStorage.getItem('userAge');
-        const savedGender = await AsyncStorage.getItem('userGender');
-        const savedZodiac = await AsyncStorage.getItem('userZodiac');
-        
-        if (savedAvatar !== null) {
-          setSelectedAvatar(parseInt(savedAvatar));
-        }
-        if (savedName !== null) {
-          setUserName(savedName);
-        }
-        if (savedAge !== null) {
-          setUserAge(savedAge);
-        }
-        if (savedGender !== null) {
-          setUserGender(savedGender);
-        }
-        if (savedZodiac !== null) {
-          setUserZodiac(savedZodiac);
-        }
-      }
-    } catch (error) {
-      console.log('Profil bilgileri yüklenirken hata oluştu:', error);
-    }
-  };
-
   const openModal = () => {
-    setTempSelectedAvatar(selectedAvatar);
+    profileViewModel.setTempSelectedAvatar(vmState.selectedAvatar);
     setIsModalVisible(true);
   };
 
   const selectAvatar = (index: number) => {
-    setTempSelectedAvatar(index);
+    profileViewModel.setTempSelectedAvatar(index);
   };
 
   const handleAgeChange = (text: string) => {
-    // Sadece sayısal karakterlere izin ver
-    const numericValue = text.replace(/[^0-9]/g, '');
-    
-    // Başındaki sıfırları kaldır (tek 0 hariç)
-    const trimmedValue = numericValue.replace(/^0+/, '') || (numericValue === '0' ? '0' : '');
-    
-    setUserAge(trimmedValue);
+    profileViewModel.setUserAge(text);
   };
 
   const openGenderModal = () => {
@@ -92,7 +62,7 @@ export default function EditProfile() {
   };
 
   const selectGender = (gender: string) => {
-    setUserGender(gender);
+    profileViewModel.setUserGender(gender);
     setIsGenderModalVisible(false);
   };
 
@@ -101,41 +71,31 @@ export default function EditProfile() {
   };
 
   const selectZodiac = (zodiac: string) => {
-    setUserZodiac(zodiac);
+    profileViewModel.setUserZodiac(zodiac);
     setIsZodiacModalVisible(false);
   };
 
   const saveProfile = async () => {
-    try {
-      if (Platform.OS !== 'web') {
-        await AsyncStorage.setItem('selectedAvatar', selectedAvatar.toString());
-        await AsyncStorage.setItem('userName', userName);
-        await AsyncStorage.setItem('userAge', userAge);
-        await AsyncStorage.setItem('userGender', userGender);
-        await AsyncStorage.setItem('userZodiac', userZodiac);
-      }
-      Alert.alert('Başarılı', 'Profil bilgileriniz başarıyla kaydedildi!');
-    } catch (error) {
-      Alert.alert('Hata', 'Profil bilgileri kaydedilemedi');
-      console.log('Profil kaydetme hatası:', error);
+    const result = await profileViewModel.saveProfile();
+    if (result.success) {
+      Alert.alert('Başarılı', result.message);
+    } else {
+      Alert.alert('Hata', result.message);
     }
   };
 
   const saveAvatar = async () => {
-    try {
-      setSelectedAvatar(tempSelectedAvatar);
-      if (Platform.OS !== 'web') {
-        await AsyncStorage.setItem('selectedAvatar', tempSelectedAvatar.toString());
-      }
-      setIsModalVisible(false);
-      Alert.alert('Başarılı', 'Avatar kaydedildi!');
-    } catch (error) {
-      Alert.alert('Hata', 'Avatar kaydedilemedi');
+    const result = await profileViewModel.saveAvatar();
+    setIsModalVisible(false);
+    if (result.success) {
+      Alert.alert('Başarılı', result.message);
+    } else {
+      Alert.alert('Hata', result.message);
     }
   };
 
   const renderAvatarItem = ({ item, index }: { item: any; index: number }) => {
-    const isSelected = tempSelectedAvatar === index;
+    const isSelected = vmState.tempSelectedAvatar === index;
     
     return (
       <TouchableOpacity
@@ -162,59 +122,128 @@ export default function EditProfile() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
-        {/* Avatar */}
-        <TouchableOpacity style={styles.avatarContainer} onPress={openModal}>
-          <Image 
-            source={avatarOptions[selectedAvatar]} 
-            style={styles.avatar}
-            resizeMode="cover"
-          />
-          <View style={styles.editBadge}>
-            <Icon name="edit-2" size={16} color="#fff" />
+      {/* Content ScrollView */}
+      <ScrollView 
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Avatar Section */}
+        <View style={styles.avatarSection}>
+          <TouchableOpacity style={styles.avatarContainer} onPress={openModal}>
+            <Image 
+              source={avatarOptions[vmState.selectedAvatar]} 
+              style={styles.avatar}
+              resizeMode="cover"
+            />
+            <View style={styles.editBadge}>
+              <Icon name="camera" size={16} color="#fff" />
+            </View>
+          </TouchableOpacity>
+          <Text style={styles.avatarLabel}>Profil Fotoğrafı</Text>
+        </View>
+
+        {/* Form Section */}
+        <View style={styles.formSection}>
+          {/* Display Name */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Ad Soyad</Text>
+            <View style={styles.inputContainer}>
+              <Icon name="user" size={18} color="#6B73FF" style={styles.inputIcon} />
+              <TextInput
+                style={styles.textInput}
+                placeholder="Adınızı ve soyadınızı girin"
+                value={vmState.userDisplayName}
+                onChangeText={profileViewModel.setUserDisplayName.bind(profileViewModel)}
+                placeholderTextColor="#A0A0A0"
+                maxLength={50}
+              />
+            </View>
           </View>
-        </TouchableOpacity>
 
-        {/* İsim Input */}
-        <TextInput
-          style={styles.nameInput}
-          placeholder="İsminizi girin"
-          value={userName}
-          onChangeText={setUserName}
-          placeholderTextColor="#999"
-          maxLength={30}
-        />
+          {/* Username */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Kullanıcı Adı</Text>
+            <View style={styles.inputContainer}>
+              <Icon name="at-sign" size={18} color="#6B73FF" style={styles.inputIcon} />
+              <TextInput
+                style={styles.textInput}
+                placeholder="Kullanıcı adınızı girin"
+                value={vmState.userName}
+                onChangeText={profileViewModel.setUserName.bind(profileViewModel)}
+                placeholderTextColor="#A0A0A0"
+                maxLength={20}
+                autoCapitalize="none"
+              />
+            </View>
+          </View>
 
-        {/* Yaş Input */}
-        <TextInput
-          style={styles.ageInput}
-          placeholder="Yaşınızı girin"
-          value={userAge}
-          onChangeText={handleAgeChange}
-          placeholderTextColor="#999"
-          keyboardType="numeric"
-          maxLength={2}
-        />
+          {/* Email */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>E-posta</Text>
+            <View style={styles.inputContainer}>
+              <Icon name="mail" size={18} color="#6B73FF" style={styles.inputIcon} />
+              <TextInput
+                style={styles.textInput}
+                placeholder="E-posta adresinizi girin"
+                value={vmState.userEmail}
+                onChangeText={profileViewModel.setUserEmail.bind(profileViewModel)}
+                placeholderTextColor="#A0A0A0"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                maxLength={100}
+              />
+            </View>
+          </View>
 
-        {/* Cinsiyet Dropdown */}
-        <TouchableOpacity style={styles.genderDropdown} onPress={openGenderModal}>
-          <Text style={[styles.genderText, !userGender && styles.placeholderText]}>
-            {userGender || 'Cinsiyetinizi seçin'}
-          </Text>
-        </TouchableOpacity>
+          {/* Age */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Yaş</Text>
+            <View style={styles.inputContainer}>
+              <Icon name="calendar" size={18} color="#6B73FF" style={styles.inputIcon} />
+              <TextInput
+                style={styles.textInput}
+                placeholder="Yaşınızı girin"
+                value={vmState.userAge}
+                onChangeText={handleAgeChange}
+                placeholderTextColor="#A0A0A0"
+                keyboardType="numeric"
+                maxLength={2}
+              />
+            </View>
+          </View>
 
-        {/* Burç Dropdown */}
-        <TouchableOpacity style={styles.zodiacDropdown} onPress={openZodiacModal}>
-          <Text style={[styles.zodiacText, !userZodiac && styles.placeholderText]}>
-            {userZodiac || 'Burcunuzu seçin'}
-          </Text>
-        </TouchableOpacity>
+          {/* Gender Selector */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Cinsiyet</Text>
+            <TouchableOpacity style={styles.selectorContainer} onPress={openGenderModal}>
+              <Icon name="users" size={18} color="#6B73FF" style={styles.inputIcon} />
+              <Text style={[styles.selectorText, !vmState.userGender && styles.placeholderText]}>
+                {vmState.userGender || 'Cinsiyetinizi seçin'}
+              </Text>
+              <Icon name="chevron-down" size={18} color="#A0A0A0" />
+            </TouchableOpacity>
+          </View>
 
-        {/* Kaydet Butonu */}
+          {/* Zodiac Selector */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Burç</Text>
+            <TouchableOpacity style={styles.selectorContainer} onPress={openZodiacModal}>
+              <Icon name="star" size={18} color="#6B73FF" style={styles.inputIcon} />
+              <Text style={[styles.selectorText, !vmState.userZodiac && styles.placeholderText]}>
+                {vmState.userZodiac || 'Burcunuzu seçin'}
+              </Text>
+              <Icon name="chevron-down" size={18} color="#A0A0A0" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Save Button */}
         <TouchableOpacity style={styles.saveButton} onPress={saveProfile}>
-          <Text style={styles.saveButtonText}>Profili Kaydet</Text>
+          <Icon name="check" size={20} color="#fff" style={styles.saveButtonIcon} />
+          <Text style={styles.saveButtonText}>Değişiklikleri Kaydet</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
 
       {/* Avatar Seçim Modal */}
       <Modal
@@ -273,15 +302,17 @@ export default function EditProfile() {
           <View style={styles.genderModalContent}>
             <Text style={styles.modalTitle}>Cinsiyet Seçin</Text>
             
-            {genderOptions.map((gender, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.genderOption}
-                onPress={() => selectGender(gender)}
-              >
-                <Text style={styles.genderOptionText}>{gender}</Text>
-              </TouchableOpacity>
-            ))}
+            <View style={styles.genderGrid}>
+              {genderOptions.map((gender, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.genderOption}
+                  onPress={() => selectGender(gender)}
+                >
+                  <Text style={styles.genderOptionText}>{gender}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
             
             <TouchableOpacity 
               style={styles.genderCancelButton}
@@ -332,26 +363,32 @@ export default function EditProfile() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F8F9FA',
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 60,
+  },
+  scrollContent: {
+    paddingBottom: 120,
+  },
+  avatarSection: {
     alignItems: 'center',
-    paddingHorizontal: 20,
+    marginBottom: 40,
   },
   avatarContainer: {
     position: 'relative',
-    marginBottom: 40,
+    marginBottom: 12,
   },
   avatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#f0f0f0',
-    borderWidth: 3,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#fff',
+    borderWidth: 4,
     borderColor: '#6B73FF',
-    padding: 12,
+    padding: 8,
   },
   editBadge: {
     position: 'absolute',
@@ -363,66 +400,111 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: '#fff',
-  },
-  nameInput: {
-    width: '80%',
-    height: 50,
-    borderWidth: 2,
-    borderColor: '#e0e0e0',
-    borderRadius: 12,
-    paddingHorizontal: 20,
-    fontSize: 16,
-    backgroundColor: '#fff',
-    textAlign: 'center',
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  ageInput: {
-    width: '80%',
-    height: 50,
-    borderWidth: 2,
-    borderColor: '#e0e0e0',
-    borderRadius: 12,
-    paddingHorizontal: 20,
-    fontSize: 16,
-    backgroundColor: '#fff',
-    textAlign: 'center',
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  saveButton: {
-    backgroundColor: '#6B73FF',
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderRadius: 8,
-    shadowColor: '#000',
+    shadowColor: '#6B73FF',
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 6,
+  },
+  avatarLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#6B7280',
+  },
+  formSection: {
+    flex: 1,
+  },
+  inputGroup: {
+    marginBottom: 24,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 8,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  inputIcon: {
+    marginRight: 12,
+  },
+  textInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#1F2937',
+    paddingVertical: 12,
+  },
+  selectorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  selectorText: {
+    flex: 1,
+    fontSize: 16,
+    color: '#1F2937',
+    marginLeft: 12,
+  },
+  placeholderText: {
+    color: '#9CA3AF',
+  },
+  saveButton: {
+    backgroundColor: '#6B73FF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    borderRadius: 16,
+    marginBottom: 40,
+    shadowColor: '#6B73FF',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  saveButtonIcon: {
+    marginRight: 8,
   },
   saveButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   modalOverlay: {
@@ -433,16 +515,23 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: '#fff',
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 24,
     width: '90%',
-    minHeight: 400,
     maxHeight: '80%',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#1F2937',
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -462,14 +551,14 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   selectedAvatarOption: {
-    backgroundColor: '#f0f4ff',
-    borderRadius: 8,
+    backgroundColor: '#F0F4FF',
+    borderRadius: 12,
   },
   avatarOptionImage: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#f8f9fa',
     padding: 6,
   },
   checkMark: {
@@ -477,11 +566,13 @@ const styles = StyleSheet.create({
     top: -5,
     right: -5,
     backgroundColor: '#6B73FF',
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#fff',
   },
   checkMarkText: {
     color: '#fff',
@@ -491,24 +582,24 @@ const styles = StyleSheet.create({
   modalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 20,
+    marginTop: 24,
+    gap: 12,
   },
   modalButton: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginHorizontal: 5,
+    paddingVertical: 14,
+    borderRadius: 12,
   },
   cancelButton: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F3F4F6',
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#D1D5DB',
   },
   cancelButtonText: {
-    color: '#666',
+    color: '#6B7280',
     textAlign: 'center',
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   confirmButton: {
     backgroundColor: '#6B73FF',
@@ -519,80 +610,67 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  genderDropdown: {
-    width: '80%',
-    height: 50,
-    borderWidth: 2,
-    borderColor: '#e0e0e0',
-    borderRadius: 12,
-    paddingHorizontal: 20,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  genderText: {
-    fontSize: 16,
-    color: '#333',
-  },
-  placeholderText: {
-    color: '#999',
-  },
-  dropdownIcon: {
-    fontSize: 12,
-    color: '#666',
-  },
   genderModalContent: {
     backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 24,
-    width: '80%',
-    maxHeight: '60%',
-  },
-  genderOption: {
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    marginVertical: 4,
+    borderRadius: 20,
+    padding: 28,
+    width: '85%',
+    maxHeight: '50%',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 1,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  genderGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+    paddingHorizontal: 4,
+  },
+  genderOption: {
+    width: '30%',
+    paddingVertical: 16,
+    paddingHorizontal: 6,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 16,
+    marginVertical: 8,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowRadius: 4,
+    elevation: 3,
+    minHeight: 50,
+    justifyContent: 'center',
   },
   genderOptionText: {
     fontSize: 16,
-    color: '#333',
+    color: '#1F2937',
     textAlign: 'center',
-    fontWeight: '500',
+    fontWeight: '600',
   },
   genderCancelButton: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F3F4F6',
     borderWidth: 1,
-    borderColor: '#ddd',
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 20,
+    borderColor: '#D1D5DB',
+    paddingVertical: 14,
+    borderRadius: 12,
+    marginTop: 8,
   },
   genderCancelButtonText: {
-    color: '#666',
+    color: '#6B7280',
     textAlign: 'center',
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   zodiacDropdown: {
     width: '80%',
@@ -629,55 +707,55 @@ const styles = StyleSheet.create({
       width: 0,
       height: 4,
     },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
     elevation: 8,
   },
   zodiacGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: 24,
     paddingHorizontal: 4,
   },
   zodiacOption: {
     width: '30%',
-    paddingVertical: 14,
+    paddingVertical: 16,
     paddingHorizontal: 6,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 16,
     marginVertical: 8,
     borderWidth: 1,
-    borderColor: '#e9ecef',
+    borderColor: '#E5E7EB',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.15,
-    shadowRadius: 3,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     elevation: 3,
-    minHeight: 45,
+    minHeight: 50,
     justifyContent: 'center',
   },
   zodiacOptionText: {
-    fontSize: 15,
-    color: '#333',
+    fontSize: 16,
+    color: '#1F2937',
     textAlign: 'center',
     fontWeight: '600',
   },
   zodiacCancelButton: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F3F4F6',
     borderWidth: 1,
-    borderColor: '#ddd',
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 20,
+    borderColor: '#D1D5DB',
+    paddingVertical: 14,
+    borderRadius: 12,
+    marginTop: 8,
   },
   zodiacCancelButtonText: {
-    color: '#666',
+    color: '#6B7280',
     textAlign: 'center',
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
   },
 });

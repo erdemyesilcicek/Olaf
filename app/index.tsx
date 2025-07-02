@@ -1,10 +1,10 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { profileViewModel, ProfileViewModelState } from '../viewmodels/ProfileViewModel';
 
 export default function Index() {
-  const [selectedAvatar, setSelectedAvatar] = useState(0);
+  const [vmState, setVmState] = useState<ProfileViewModelState>(profileViewModel.getState());
 
   // Avatar options matching the profile page
   const avatarOptions = [
@@ -16,30 +16,26 @@ export default function Index() {
     require('../assets/images/tiger.png'),
   ];
 
-  // Load saved avatar on component mount
+  // Component mount olduğunda ViewModel'i dinle ve profil bilgilerini yükle
   useEffect(() => {
-    loadSavedAvatar();
+    const handleStateChange = (state: ProfileViewModelState) => {
+      setVmState(state);
+    };
+
+    profileViewModel.addListener(handleStateChange);
+    profileViewModel.loadSavedProfile();
+
+    return () => {
+      profileViewModel.removeListener(handleStateChange);
+    };
   }, []);
 
-  // Reload avatar when screen comes into focus (e.g., returning from Profile page)
+  // Sayfa focus olduğunda profil bilgilerini yeniden yükle
   useFocusEffect(
     useCallback(() => {
-      loadSavedAvatar();
+      profileViewModel.loadSavedProfile();
     }, [])
   );
-
-  const loadSavedAvatar = async () => {
-    try {
-      if (Platform.OS !== 'web') {
-        const savedAvatar = await AsyncStorage.getItem('selectedAvatar');
-        if (savedAvatar !== null) {
-          setSelectedAvatar(parseInt(savedAvatar));
-        }
-      }
-    } catch (error) {
-      console.log('Avatar yüklenirken hata oluştu:', error);
-    }
-  };
 
   // 50 motivasyon sözü listesi
   const motivationQuotes = [
@@ -160,7 +156,7 @@ export default function Index() {
           <View style={styles.profileCard}>
             <View style={styles.profileImageContainer}>
               <Image 
-                source={avatarOptions[selectedAvatar]}
+                source={avatarOptions[vmState.selectedAvatar]}
                 style={styles.profileImage}
               />
             </View>

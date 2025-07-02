@@ -1,8 +1,42 @@
-import { router } from "expo-router";
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Icon from 'react-native-vector-icons/Feather';
+import { profileViewModel, ProfileViewModelState } from '../viewmodels/ProfileViewModel';
 
 export default function Settings() {
+  const [vmState, setVmState] = useState<ProfileViewModelState>(profileViewModel.getState());
+
+  // Avatar options matching the profile page
+  const avatarOptions = [
+    require('../assets/images/olaf.png'),
+    require('../assets/images/dog.png'),
+    require('../assets/images/cat.png'),
+    require('../assets/images/horse.png'),
+    require('../assets/images/elephant.png'),
+    require('../assets/images/tiger.png'),
+  ];
+
+  // Component mount olduğunda ViewModel'i dinle ve profil bilgilerini yükle
+  useEffect(() => {
+    const handleStateChange = (state: ProfileViewModelState) => {
+      setVmState(state);
+    };
+
+    profileViewModel.addListener(handleStateChange);
+    profileViewModel.loadSavedProfile();
+
+    return () => {
+      profileViewModel.removeListener(handleStateChange);
+    };
+  }, []);
+
+  // Sayfa focus olduğunda profil bilgilerini yeniden yükle
+  useFocusEffect(
+    useCallback(() => {
+      profileViewModel.loadSavedProfile();
+    }, [])
+  );
   const handleProfilePress = () => {
     router.push('/edit-profile');
   };
@@ -104,15 +138,23 @@ export default function Settings() {
         <View style={styles.content}>
           {/* Profile Card */}
           <TouchableOpacity style={styles.profileCard} onPress={handleProfilePress} activeOpacity={0.7}>
-            <View style={styles.profileIcon}>
-              <Icon name="user" size={32} color="#6B73FF" />
+            <View style={styles.profileImageContainer}>
+              <Image 
+                source={avatarOptions[vmState.selectedAvatar]}
+                style={styles.profileImage}
+                resizeMode="cover"
+              />
             </View>
             <View style={styles.profileInfo}>
-              <Text style={styles.profileName}>Kullanıcı Adı</Text>
-              <Text style={styles.profileEmail}>kullanici@email.com</Text>
+              <Text style={styles.profileName}>
+                {vmState.userDisplayName || vmState.userName || 'Kullanıcı Adı'}
+              </Text>
+              <Text style={styles.profileEmail}>
+                {vmState.userEmail || 'kullanici@email.com'}
+              </Text>
             </View>
             <View style={styles.editProfile}>
-              <Icon name="edit-2" size={16} color="#6B73FF" />
+              <Icon name="chevron-right" size={20} color="#9CA3AF" />
             </View>
           </TouchableOpacity>
 
@@ -187,6 +229,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
+  },
+  profileImageContainer: {
+    marginRight: 16,
+    justifyContent: 'center',
+    backgroundColor: '#F8F9FA',
+    borderRadius: 30,
+    padding: 4,
+  },
+  profileImage: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#F3F4F6',
   },
   profileInfo: {
     flex: 1,
